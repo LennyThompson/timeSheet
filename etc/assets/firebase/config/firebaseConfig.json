@@ -1,0 +1,6 @@
+{
+    "apiKey": "AIzaSyDRC967G6VYdiZLjOgLh6l6fabmDk_k9WI",
+    "authDomain": "mydodgyapp.firebaseapp.com",
+    "databaseURL": "https://mydodgyapp.firebaseio.com",
+    "storageBucket": "mydodgyapp.appspot.com"
+}

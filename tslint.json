@@ -1,0 +1,67 @@
+{
+    "rulesDirectory": "node_modules/tslint-eslint-rules/dist/rules",
+    "rules": {
+        "class-name": true,
+        "comment-format": [
+            true,
+            "check-space"
+        ],
+        "indent": [
+            true,
+            "spaces"
+        ],
+        "no-duplicate-variable": true,
+        "no-eval": true,
+        "no-internal-module": true,
+        "no-trailing-whitespace": true,
+        "no-unsafe-finally": true,
+        "no-var-keyword": true,
+        "curly": true,
+        "brace-style": [
+            true,
+            "allman",
+            {
+                "allowSingleLine": false
+            }
+        ],
+        "one-line": [
+            true,
+            "check-whitespace"
+        ],
+        "quotemark": [
+            true,
+            "double"
+        ],
+        "semicolon": [
+            true,
+            "always"
+        ],
+        "triple-equals": [
+            true,
+            "allow-null-check"
+        ],
+        "typedef-whitespace": [
+            true,
+            {
+                "call-signature": "onespace",
+                "index-signature": "nospace",
+                "parameter": "onespace",
+                "property-declaration": "onespace",
+                "variable-declaration": "onespace"
+            }
+        ],
+        "variable-name": [
+            true,
+            "ban-keywords"
+        ],
+        "whitespace": [
+            true,
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-separator",
+            "check-type"
+        ]
+
+    }
+}
