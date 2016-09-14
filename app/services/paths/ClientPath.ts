@@ -1,11 +1,11 @@
 // ****THIS IS A CODE GENERATED FILE DO NOT EDIT****
-// Generated on Fri Sep 09 19:42:27 AEST 2016
+// Generated on Wed Sep 14 10:04:47 AEST 2016
 
 import {Client} from "../types/Client";
 import {ClientJob} from "../types/ClientJob";
 import {Job} from "../types/Job";
 import {JobPath} from "./JobPath";
-import {forEach} from "lodash";
+import * as lodash from "lodash";
 
 import { AngularFire } from "angularfire2/angularfire2";
 import { Observable, Subscription } from "rxjs/Rx";
@@ -63,9 +63,10 @@ import { storage } from "firebase";
                     let objClientJobReference = new ClientJobReference();
                     objClientJobReference.m_ClientJob = ClientJob.fromFirebase(itemClientJob);
 
-                    objClientJobReference.m_JobPath = JobPath.loadFromDatabase(angularFire, userid, objClientJobReference.m_ClientJob.jobId);
-
-                    return objClientJobReference;
+                    return JobPath.loadFromDatabase(
+                        angularFire,
+                        userid, objClientJobReference.m_ClientJob.jobId
+                    );
                 }
             );
     }
@@ -90,9 +91,10 @@ import { storage } from "firebase";
                                 let objClientJobReference = new ClientJobReference();
                                 objClientJobReference.m_ClientJob = ClientJob.fromFirebase(itemClientJob);
 
-                                objClientJobReference.m_JobPath = JobPath.loadFromDatabase(angularFire, userid, objClientJobReference.m_ClientJob.jobId);
-
-                                return objClientJobReference;
+                                return JobPath.loadFromDatabase(
+                                    angularFire,
+                                    userid, objClientJobReference.m_ClientJob.jobId
+                                );
                             }
                         );
                     }
@@ -107,7 +109,8 @@ import { storage } from "firebase";
             .subscribe(
                 (objClientJobReference) =>
                 {
-                    return objClientJobReference.$exists();
+                // TODO: change this once angularfire2 is updated to include $exists
+                    return true; // objClientJobReference.$exists();
                 },
                 () =>
                 {
@@ -170,6 +173,16 @@ export class ClientPath
                 .then(
                     () =>
                     {
+                        lodash.forEach(
+                            this.m_JobPathList,
+                            (objJobPath) =>
+                            {
+                                let objClientJobReference = ClientJobReference.createClientJobReference(objJobPath, userid, this.key, objJobPath.key);
+                                listPromises.push(objClientJobReference.saveToDatabase(angularFire, userid, this.key, objJobPath.key));
+                            }
+                        );
+
+
                         return true;
                     }
                 )
@@ -183,22 +196,22 @@ export class ClientPath
                 .then(
                     (objPushed : any) =>
                     {
-                        this.__path = objPushed.$key;
+                        this.__path = objPushed.key;
+                        lodash.forEach(
+                            this.m_JobPathList,
+                            (objJobPath) =>
+                            {
+                                let objClientJobReference = ClientJobReference.createClientJobReference(objJobPath, userid, this.key, objJobPath.key);
+                                listPromises.push(objClientJobReference.saveToDatabase(angularFire, userid, this.key, objJobPath.key));
+                            }
+                        );
+
+
                         return true;
                     }
                 )
             );
         }
-        forEach(
-            this.m_JobPathList,
-            (objJobPath) =>
-            {
-                let objClientJobReference = ClientJobReference.createClientJobReference(objJobPath, userid, this.key, objJobPath.key);
-                listPromises.push(objClientJobReference.saveToDatabase(angularFire, userid, this.key, objJobPath.key));
-            }
-        );
-
-
 
         return Promise.all(listPromises);
     }
@@ -235,14 +248,7 @@ export class ClientPath
                     objClientPath.m_Client = Client.fromFirebase(itemClient);
                     objClientPath.__path = itemClient.$key;
 
-                    objClientPath.m_JobPathList = ClientJobReference.loadAllFromDatabase(angularFire, userid, objClientPath.__path)
-                        .map(
-                            (objRef) =>
-                            {
-                                return objRef.m_JobPath;
-                            }
-                        );
-
+                    objClientPath.m_JobPathList = ClientJobReference.loadAllFromDatabase(angularFire, userid, objClientPath.__path);
 
 
                     return objClientPath;
@@ -271,14 +277,7 @@ export class ClientPath
                                 objClientPath.m_Client = Client.fromFirebase(itemClient);
                                 objClientPath.__path = itemClient.$key;
 
-                                objClientPath.m_JobPathList = ClientJobReference.loadAllFromDatabase(angularFire, userid, objClientPath.__path)
-                                    .map(
-                                        (objRef) =>
-                                        {
-                                            return objRef.m_JobPath;
-                                        }
-                                    );
-
+                                objClientPath.m_JobPathList = ClientJobReference.loadAllFromDatabase(angularFire, userid, objClientPath.__path);
 
 
                                 return objClientPath;
@@ -296,7 +295,8 @@ export class ClientPath
             .subscribe(
                 (objClientPath) =>
                 {
-                    return objClientPath.$exists();
+                // TODO: change this once angularfire2 is updated to include $exists
+                    return true; // objClientPath.$exists();
                 },
                 () =>
                 {

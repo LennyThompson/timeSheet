@@ -1,5 +1,5 @@
 // ****THIS IS A CODE GENERATED FILE DO NOT EDIT****
-// Generated on Fri Sep 09 19:42:27 AEST 2016
+// Generated on Wed Sep 14 10:04:47 AEST 2016
 
 import {Activity} from "../types/Activity";
 
@@ -56,7 +56,7 @@ export class ActivityPath
                 .then(
                     (objPushed : any) =>
                     {
-                        this.__path = objPushed.$key;
+                        this.__path = objPushed.key;
                         return true;
                     }
                 )
@@ -98,7 +98,6 @@ export class ActivityPath
                     objActivityPath.m_Activity = Activity.fromFirebase(itemActivity);
                     objActivityPath.__path = itemActivity.$key;
 
-
                     return objActivityPath;
                 }
             );
@@ -125,7 +124,6 @@ export class ActivityPath
                                 objActivityPath.m_Activity = Activity.fromFirebase(itemActivity);
                                 objActivityPath.__path = itemActivity.$key;
 
-
                                 return objActivityPath;
                             }
                         );
@@ -141,7 +139,8 @@ export class ActivityPath
             .subscribe(
                 (objActivityPath) =>
                 {
-                    return objActivityPath.$exists();
+                // TODO: change this once angularfire2 is updated to include $exists
+                    return true; // objActivityPath.$exists();
                 },
                 () =>
                 {

@@ -1,7 +1,8 @@
 import "./polyfills";
 import {BrowserDynamicTestingModule, platformBrowserDynamicTesting} from "@angular/platform-browser-dynamic/testing";
 import {TestBed} from "@angular/core/testing";
-import { initializeApp } from "firebase";
+// import { initializeApp } from "firebase";
+import {AngularFireModule, AuthMethods, AuthProviders} from "angularfire2";
 
 TestBed.initTestEnvironment(
     BrowserDynamicTestingModule,
@@ -14,8 +15,13 @@ const firebaseConfig = {
     databaseURL: "https://mydodgyapp.firebaseio.com",
     storageBucket: "mydodgyapp.appspot.com",
 };
-
-initializeApp(firebaseConfig);
+const firebaseAuthConfig = {
+    provider: AuthProviders.Password,
+    method: AuthMethods.Password,
+    remember: "default"
+};
+// initializeApp(firebaseConfig);
+const FirebaseModule = AngularFireModule.initializeApp(firebaseConfig, firebaseAuthConfig);
 
 const chai = require("chai");
 chai.use(require("chai-as-promised"));

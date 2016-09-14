@@ -1,10 +1,10 @@
 // ****THIS IS A CODE GENERATED FILE DO NOT EDIT****
-// Generated on Fri Sep 09 19:42:27 AEST 2016
+// Generated on Wed Sep 14 10:04:47 AEST 2016
 "use strict";
 var Job_1 = require("../types/Job");
 var JobActivity_1 = require("../types/JobActivity");
 var ActivityPath_1 = require("./ActivityPath");
-var lodash_1 = require("lodash");
+var lodash = require("lodash");
 var JobActivityReference = (function () {
     function JobActivityReference() {
         this.m_JobActivity = new JobActivity_1.JobActivity();
@@ -42,8 +42,7 @@ var JobActivityReference = (function () {
             .map(function (itemJobActivity) {
             var objJobActivityReference = new JobActivityReference();
             objJobActivityReference.m_JobActivity = JobActivity_1.JobActivity.fromFirebase(itemJobActivity);
-            objJobActivityReference.m_ActivityPath = ActivityPath_1.ActivityPath.loadFromDatabase(angularFire, userid, objJobActivityReference.m_ActivityPath.Activity.yearId, objJobActivityReference.m_ActivityPath.Activity.monthId, objJobActivityReference.m_ActivityPath.Activity.dayId, objJobActivityReference.m_JobActivity.activityId);
-            return objJobActivityReference;
+            return ActivityPath_1.ActivityPath.loadFromDatabase(angularFire, userid, objJobActivityReference.m_JobActivity.yearId, objJobActivityReference.m_JobActivity.monthId, objJobActivityReference.m_JobActivity.dayId, objJobActivityReference.m_JobActivity.activityId);
         });
     };
     JobActivityReference.loadAllFromDatabase = function (angularFire, userid, jobId) {
@@ -56,8 +55,7 @@ var JobActivityReference = (function () {
                 return listJobActivity.map(function (itemJobActivity) {
                     var objJobActivityReference = new JobActivityReference();
                     objJobActivityReference.m_JobActivity = JobActivity_1.JobActivity.fromFirebase(itemJobActivity);
-                    objJobActivityReference.m_ActivityPath = ActivityPath_1.ActivityPath.loadFromDatabase(angularFire, userid, objJobActivityReference.m_ActivityPath.Activity.yearId, objJobActivityReference.m_ActivityPath.Activity.monthId, objJobActivityReference.m_ActivityPath.Activity.dayId, objJobActivityReference.m_JobActivity.activityId);
-                    return objJobActivityReference;
+                    return ActivityPath_1.ActivityPath.loadFromDatabase(angularFire, userid, objJobActivityReference.m_JobActivity.yearId, objJobActivityReference.m_JobActivity.monthId, objJobActivityReference.m_JobActivity.dayId, objJobActivityReference.m_JobActivity.activityId);
                 });
             }
         });
@@ -66,7 +64,8 @@ var JobActivityReference = (function () {
         var strPath = JobActivityReference.buildPath(userid, this.m_JobActivity.jobId, this.m_JobActivity.activityId);
         return angularFire.database.object(strPath)
             .subscribe(function (objJobActivityReference) {
-            return objJobActivityReference.$exists();
+            // TODO: change this once angularfire2 is updated to include $exists
+            return true; // objJobActivityReference.$exists();
         }, function () {
             return false;
         });
@@ -115,20 +114,24 @@ var JobPath = (function () {
         if (this.__path) {
             listPromises.push(angularFire.database.object(strPath).set(objFirebase)
                 .then(function () {
+                lodash.forEach(_this.m_ActivityPathList, function (objActivityPath) {
+                    var objJobActivityReference = JobActivityReference.createJobActivityReference(objActivityPath, userid, _this.key, objActivityPath.key);
+                    listPromises.push(objJobActivityReference.saveToDatabase(angularFire, userid, _this.key, objActivityPath.key));
+                });
                 return true;
             }));
         }
         else {
             listPromises.push(angularFire.database.list(strPath).push(objFirebase)
                 .then(function (objPushed) {
-                _this.__path = objPushed.$key;
+                _this.__path = objPushed.key;
+                lodash.forEach(_this.m_ActivityPathList, function (objActivityPath) {
+                    var objJobActivityReference = JobActivityReference.createJobActivityReference(objActivityPath, userid, _this.key, objActivityPath.key);
+                    listPromises.push(objJobActivityReference.saveToDatabase(angularFire, userid, _this.key, objActivityPath.key));
+                });
                 return true;
             }));
         }
-        lodash_1.forEach(this.m_ActivityPathList, function (objActivityPath) {
-            var objJobActivityReference = JobActivityReference.createJobActivityReference(objActivityPath, userid, _this.key, objActivityPath.key);
-            listPromises.push(objJobActivityReference.saveToDatabase(angularFire, userid, _this.key, objActivityPath.key));
-        });
         return Promise.all(listPromises);
     };
     JobPath.prototype.updateInDatabase = function (angularFire, userid) {
@@ -152,10 +155,7 @@ var JobPath = (function () {
             var objJobPath = new JobPath();
             objJobPath.m_Job = Job_1.Job.fromFirebase(itemJob);
             objJobPath.__path = itemJob.$key;
-            objJobPath.m_ActivityPathList = JobActivityReference.loadAllFromDatabase(angularFire, userid, objJobPath.__path)
-                .map(function (objRef) {
-                return objRef.m_ActivityPath;
-            });
+            objJobPath.m_ActivityPathList = JobActivityReference.loadAllFromDatabase(angularFire, userid, objJobPath.__path);
             return objJobPath;
         });
     };
@@ -170,10 +170,7 @@ var JobPath = (function () {
                     var objJobPath = new JobPath();
                     objJobPath.m_Job = Job_1.Job.fromFirebase(itemJob);
                     objJobPath.__path = itemJob.$key;
-                    objJobPath.m_ActivityPathList = JobActivityReference.loadAllFromDatabase(angularFire, userid, objJobPath.__path)
-                        .map(function (objRef) {
-                        return objRef.m_ActivityPath;
-                    });
+                    objJobPath.m_ActivityPathList = JobActivityReference.loadAllFromDatabase(angularFire, userid, objJobPath.__path);
                     return objJobPath;
                 });
             }
@@ -183,13 +180,14 @@ var JobPath = (function () {
         var strPath = JobPath.buildPath(userid, jobId);
         return angularFire.database.object(strPath)
             .subscribe(function (objJobPath) {
-            return objJobPath.$exists();
+            // TODO: change this once angularfire2 is updated to include $exists
+            return true; // objJobPath.$exists();
         }, function () {
             return false;
         });
     };
     JobPath.buildPath = function (userid, strUuid) {
-        var strPath = "/users/" + userid + "/jobs";
+        var strPath = "/users/" + userid + "/jobs/job_list";
         if (strUuid) {
             strPath += "/" + strUuid;
         }

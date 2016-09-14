@@ -1,5 +1,5 @@
 // ****THIS IS A CODE GENERATED FILE DO NOT EDIT****
-// Generated on Fri Sep 09 19:42:27 AEST 2016
+// Generated on Wed Sep 14 10:04:47 AEST 2016
 "use strict";
 var Image_1 = require("../types/Image");
 var ActiveImage = (function () {
@@ -35,7 +35,7 @@ var ActiveImage = (function () {
         else {
             listPromises.push(angularFire.database.list(strPath).push(objFirebase)
                 .then(function (objPushed) {
-                _this.__path = objPushed.$key;
+                _this.__path = objPushed.key;
                 return true;
             }));
         }
@@ -85,7 +85,8 @@ var ActiveImage = (function () {
         var strPath = ActiveImage.buildPath(userid, imageId);
         return angularFire.database.object(strPath)
             .subscribe(function (objActiveImage) {
-            return objActiveImage.$exists();
+            // TODO: change this once angularfire2 is updated to include $exists
+            return true; // objActiveImage.$exists();
         }, function () {
             return false;
         });

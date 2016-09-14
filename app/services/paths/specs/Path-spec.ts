@@ -3,12 +3,14 @@ import { ActivityPath } from "../ActivityPath";
 import {FirebaseModule} from "../../firebase/index";
 import {
     AngularFire, FirebaseAuth, FirebaseAuthState, FirebaseApp, AuthProviders,
-    AuthMethods, firebaseAuthConfig
+    AuthMethods, firebaseAuthConfig, FirebaseConfig, AngularFireAuth, WindowLocation
 } from "angularfire2/angularfire2";
+// import { FirebaseConfig as FirebaseUrl } from "angularfire2/angularfire2";
 import {ActivityStatus} from "../../enums/ActivityStatus";
 import {ActivityType} from "../../enums/ActivityType";
 import {LockStatus} from "../../enums/LockStatus";
 import {Subscription} from "rxjs";
+import {first} from "rxjs/operator/first";
 import * as moment from "moment";
 import * as lodash from "lodash";
 import {UserData} from "../UserData";
@@ -16,6 +18,8 @@ import { app } from "firebase";
 import {JobPath} from "../JobPath";
 import {JobType} from "../../enums/JobType";
 import {JobStatus} from "../../enums/JobStatus";
+import {OpaqueToken} from "@angular/core";
+import {AuthBackend} from "angularfire2/auth";
 
 const chai = require("chai");
 const expect : Function = chai.expect;
@@ -31,20 +35,24 @@ describe("Data layer tests...", function()
     beforeEach(
         () =>
         {
-            console.log(app("[DEFAULT]"));
+            // console.log(app("[DEFAULT]"));
             TestBed.configureTestingModule(
                 {
                     declarations: [],
                     providers: [
-                        { provide: FirebaseApp, useValue: app("[DEFAULT]") },
-                        firebaseAuthConfig({
-                            provider: AuthProviders.Password,
-                            method: AuthMethods.Password
-                        }),
+                        // {provide: FirebaseUrl, useValue: new OpaqueToken("FirebaseUrl") },
+                        // {provide: WindowLocation, useValue: new OpaqueToken("WindowLocation") },
+                        // { provide: FirebaseApp, useValue: app("[DEFAULT]") },
+                        // firebaseAuthConfig({
+                        //     provider: AuthProviders.Password,
+                        //     method: AuthMethods.Password
+                        // }),
+                        // { provide: AngularFireAuth, useClass: AngularFireAuth },
+                        // { provide: AuthBackend, useClass: AuthBackend },
                         AngularFire,
                         FirebaseAuth
                     ],
-                    imports: []
+                    imports: [FirebaseModule]
                 }
             );
 
@@ -89,7 +97,7 @@ describe("Data layer tests...", function()
                                             listPathsToRemove,
                                             (path) =>
                                             {
-                                                // listPromises.push(angularFire.database.list(path).remove());
+                                                listPromises.push(angularFire.database.list(path).remove());
                                             }
                                         );
                                         Promise.all(listPromises)
@@ -274,7 +282,7 @@ describe("Data layer tests...", function()
                         .then(
                             () =>
                             {
-                                let authSubscribe : Subscription = angularFire.auth.subscribe(
+                                let authSubscribe : Subscription = angularFire.auth.take(1).subscribe(
                                     (auth) =>
                                     {
                                         let actPath = new ActivityPath();
@@ -308,8 +316,53 @@ describe("Data layer tests...", function()
                                             .then(
                                                 () =>
                                                 {
-                                                    done();
+                                                    JobPath.loadAllFromDatabase(angularFire, auth.uid).subscribe(
+                                                        (listJobs) =>
+                                                        {
+                                                            expect(listJobs).to.not.be.null;
+
+                                                            console.log("List of jobs: " + listJobs);
+
+                                                            lodash.forEach(
+                                                                listJobs,
+                                                                (objJobData) =>
+                                                                {
+                                                                    expect(objJobData).to.not.be.null;
+                                                                    expect(objJobData).to.not.be.undefined;
+                                                                    expect(objJobData.Job).to.not.be.undefined;
+                                                                    expect(objJobData.Job.name).to.equal("Test job");
+
+                                                                    console.log("Activity list: " + objJobData.ActivityPathList);
+                                                                    objJobData.ActivityPathList.take(1).subscribe(
+                                                                        (activityPathList) =>
+                                                                        {
+                                                                            expect(activityPathList).to.not.be.undefined;
+                                                                            expect(activityPathList.length).to.equal(1);
+                                                                            lodash.forEach(
+                                                                                activityPathList,
+                                                                                (activityPathObs) =>
+                                                                                {
+                                                                                    activityPathObs.take(1).subscribe(
+                                                                                        (activityPath) =>
+                                                                                        {
+                                                                                            expect(activityPath.Activity.description).to.equal("A new activity");
+                                                                                            expect(activityPath.Activity.duration).to.equal(60 * 60 * 1000);
+                                                                                            done();
+                                                                                        }
+                                                                                    );
+
+                                                                                }
+                                                                            );
+                                                                        }
+
+                                                                    );
+
+                                                                }
+                                                            );
+                                                        }
+                                                    );
                                                 }
+
                                             )
                                             .catch(
                                                 (error) =>
@@ -320,7 +373,6 @@ describe("Data layer tests...", function()
                                             );
                                     }
                                 );
-                                authSubscribe.unsubscribe();
                             }
                         );
                 }

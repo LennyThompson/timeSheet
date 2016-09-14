@@ -1,5 +1,5 @@
 // ****THIS IS A CODE GENERATED FILE DO NOT EDIT****
-// Generated on Fri Sep 09 19:42:27 AEST 2016
+// Generated on Wed Sep 14 10:04:47 AEST 2016
 "use strict";
 var Activity_1 = require("../types/Activity");
 var ActivityPath = (function () {
@@ -35,7 +35,7 @@ var ActivityPath = (function () {
         else {
             listPromises.push(angularFire.database.list(strPath).push(objFirebase)
                 .then(function (objPushed) {
-                _this.__path = objPushed.$key;
+                _this.__path = objPushed.key;
                 return true;
             }));
         }
@@ -85,7 +85,8 @@ var ActivityPath = (function () {
         var strPath = ActivityPath.buildPath(userid, this.m_Activity.yearId, this.m_Activity.monthId, this.m_Activity.dayId, activityId);
         return angularFire.database.object(strPath)
             .subscribe(function (objActivityPath) {
-            return objActivityPath.$exists();
+            // TODO: change this once angularfire2 is updated to include $exists
+            return true; // objActivityPath.$exists();
         }, function () {
             return false;
         });

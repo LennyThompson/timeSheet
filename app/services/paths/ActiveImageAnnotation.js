@@ -1,5 +1,5 @@
 // ****THIS IS A CODE GENERATED FILE DO NOT EDIT****
-// Generated on Fri Sep 09 19:42:27 AEST 2016
+// Generated on Wed Sep 14 10:04:47 AEST 2016
 "use strict";
 var ImageAnnotation_1 = require("../types/ImageAnnotation");
 var ActiveImageAnnotation = (function () {
@@ -35,7 +35,7 @@ var ActiveImageAnnotation = (function () {
         else {
             listPromises.push(angularFire.database.list(strPath).push(objFirebase)
                 .then(function (objPushed) {
-                _this.__path = objPushed.$key;
+                _this.__path = objPushed.key;
                 return true;
             }));
         }
@@ -85,7 +85,8 @@ var ActiveImageAnnotation = (function () {
         var strPath = ActiveImageAnnotation.buildPath(userid, imageId, annotateId);
         return angularFire.database.object(strPath)
             .subscribe(function (objActiveImageAnnotation) {
-            return objActiveImageAnnotation.$exists();
+            // TODO: change this once angularfire2 is updated to include $exists
+            return true; // objActiveImageAnnotation.$exists();
         }, function () {
             return false;
         });

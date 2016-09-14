@@ -1,11 +1,11 @@
 // ****THIS IS A CODE GENERATED FILE DO NOT EDIT****
-// Generated on Fri Sep 09 19:42:27 AEST 2016
+// Generated on Wed Sep 14 10:04:47 AEST 2016
 
 import {Job} from "../types/Job";
 import {JobActivity} from "../types/JobActivity";
 import {Activity} from "../types/Activity";
 import {ActivityPath} from "./ActivityPath";
-import {forEach} from "lodash";
+import * as lodash from "lodash";
 
 import { AngularFire } from "angularfire2/angularfire2";
 import { Observable, Subscription } from "rxjs/Rx";
@@ -66,9 +66,10 @@ import { storage } from "firebase";
                     let objJobActivityReference = new JobActivityReference();
                     objJobActivityReference.m_JobActivity = JobActivity.fromFirebase(itemJobActivity);
 
-                    objJobActivityReference.m_ActivityPath = ActivityPath.loadFromDatabase(angularFire, userid, objJobActivityReference.m_ActivityPath.Activity.yearId, objJobActivityReference.m_ActivityPath.Activity.monthId, objJobActivityReference.m_ActivityPath.Activity.dayId, objJobActivityReference.m_JobActivity.activityId);
-
-                    return objJobActivityReference;
+                    return ActivityPath.loadFromDatabase(
+                        angularFire,
+                        userid, objJobActivityReference.m_JobActivity.yearId, objJobActivityReference.m_JobActivity.monthId, objJobActivityReference.m_JobActivity.dayId, objJobActivityReference.m_JobActivity.activityId
+                    );
                 }
             );
     }
@@ -93,9 +94,10 @@ import { storage } from "firebase";
                                 let objJobActivityReference = new JobActivityReference();
                                 objJobActivityReference.m_JobActivity = JobActivity.fromFirebase(itemJobActivity);
 
-                                objJobActivityReference.m_ActivityPath = ActivityPath.loadFromDatabase(angularFire, userid, objJobActivityReference.m_ActivityPath.Activity.yearId, objJobActivityReference.m_ActivityPath.Activity.monthId, objJobActivityReference.m_ActivityPath.Activity.dayId, objJobActivityReference.m_JobActivity.activityId);
-
-                                return objJobActivityReference;
+                                return ActivityPath.loadFromDatabase(
+                                    angularFire,
+                                    userid, objJobActivityReference.m_JobActivity.yearId, objJobActivityReference.m_JobActivity.monthId, objJobActivityReference.m_JobActivity.dayId, objJobActivityReference.m_JobActivity.activityId
+                                );
                             }
                         );
                     }
@@ -110,7 +112,8 @@ import { storage } from "firebase";
             .subscribe(
                 (objJobActivityReference) =>
                 {
-                    return objJobActivityReference.$exists();
+                // TODO: change this once angularfire2 is updated to include $exists
+                    return true; // objJobActivityReference.$exists();
                 },
                 () =>
                 {
@@ -173,6 +176,16 @@ export class JobPath
                 .then(
                     () =>
                     {
+                        lodash.forEach(
+                            this.m_ActivityPathList,
+                            (objActivityPath) =>
+                            {
+                                let objJobActivityReference = JobActivityReference.createJobActivityReference(objActivityPath, userid, this.key, objActivityPath.key);
+                                listPromises.push(objJobActivityReference.saveToDatabase(angularFire, userid, this.key, objActivityPath.key));
+                            }
+                        );
+
+
                         return true;
                     }
                 )
@@ -186,22 +199,22 @@ export class JobPath
                 .then(
                     (objPushed : any) =>
                     {
-                        this.__path = objPushed.$key;
+                        this.__path = objPushed.key;
+                        lodash.forEach(
+                            this.m_ActivityPathList,
+                            (objActivityPath) =>
+                            {
+                                let objJobActivityReference = JobActivityReference.createJobActivityReference(objActivityPath, userid, this.key, objActivityPath.key);
+                                listPromises.push(objJobActivityReference.saveToDatabase(angularFire, userid, this.key, objActivityPath.key));
+                            }
+                        );
+
+
                         return true;
                     }
                 )
             );
         }
-        forEach(
-            this.m_ActivityPathList,
-            (objActivityPath) =>
-            {
-                let objJobActivityReference = JobActivityReference.createJobActivityReference(objActivityPath, userid, this.key, objActivityPath.key);
-                listPromises.push(objJobActivityReference.saveToDatabase(angularFire, userid, this.key, objActivityPath.key));
-            }
-        );
-
-
 
         return Promise.all(listPromises);
     }
@@ -238,14 +251,7 @@ export class JobPath
                     objJobPath.m_Job = Job.fromFirebase(itemJob);
                     objJobPath.__path = itemJob.$key;
 
-                    objJobPath.m_ActivityPathList = JobActivityReference.loadAllFromDatabase(angularFire, userid, objJobPath.__path)
-                        .map(
-                            (objRef) =>
-                            {
-                                return objRef.m_ActivityPath;
-                            }
-                        );
-
+                    objJobPath.m_ActivityPathList = JobActivityReference.loadAllFromDatabase(angularFire, userid, objJobPath.__path);
 
 
                     return objJobPath;
@@ -274,14 +280,7 @@ export class JobPath
                                 objJobPath.m_Job = Job.fromFirebase(itemJob);
                                 objJobPath.__path = itemJob.$key;
 
-                                objJobPath.m_ActivityPathList = JobActivityReference.loadAllFromDatabase(angularFire, userid, objJobPath.__path)
-                                    .map(
-                                        (objRef) =>
-                                        {
-                                            return objRef.m_ActivityPath;
-                                        }
-                                    );
-
+                                objJobPath.m_ActivityPathList = JobActivityReference.loadAllFromDatabase(angularFire, userid, objJobPath.__path);
 
 
                                 return objJobPath;
@@ -299,7 +298,8 @@ export class JobPath
             .subscribe(
                 (objJobPath) =>
                 {
-                    return objJobPath.$exists();
+                // TODO: change this once angularfire2 is updated to include $exists
+                    return true; // objJobPath.$exists();
                 },
                 () =>
                 {
@@ -310,7 +310,7 @@ export class JobPath
 
     static buildPath(userid : string, strUuid? : string) : string
     {
-        let strPath : string = "/users/" + userid + "/jobs";
+        let strPath : string = "/users/" + userid + "/jobs/job_list";
         if (strUuid)
         {
             strPath += "/" + strUuid;

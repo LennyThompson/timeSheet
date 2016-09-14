@@ -1,5 +1,5 @@
 // ****THIS IS A CODE GENERATED FILE DO NOT EDIT****
-// Generated on Fri Sep 09 19:42:27 AEST 2016
+// Generated on Wed Sep 14 10:04:47 AEST 2016
 
 import {Image} from "../types/Image";
 
@@ -56,7 +56,7 @@ export class ActiveImage
                 .then(
                     (objPushed : any) =>
                     {
-                        this.__path = objPushed.$key;
+                        this.__path = objPushed.key;
                         return true;
                     }
                 )
@@ -98,7 +98,6 @@ export class ActiveImage
                     objActiveImage.m_Image = Image.fromFirebase(itemImage);
                     objActiveImage.__path = itemImage.$key;
 
-
                     return objActiveImage;
                 }
             );
@@ -125,7 +124,6 @@ export class ActiveImage
                                 objActiveImage.m_Image = Image.fromFirebase(itemImage);
                                 objActiveImage.__path = itemImage.$key;
 
-
                                 return objActiveImage;
                             }
                         );
@@ -141,7 +139,8 @@ export class ActiveImage
             .subscribe(
                 (objActiveImage) =>
                 {
-                    return objActiveImage.$exists();
+                // TODO: change this once angularfire2 is updated to include $exists
+                    return true; // objActiveImage.$exists();
                 },
                 () =>
                 {

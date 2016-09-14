@@ -1,11 +1,11 @@
 "use strict";
 var testing_1 = require("@angular/core/testing");
 var ActivityPath_1 = require("../ActivityPath");
+var index_1 = require("../../firebase/index");
 var angularfire2_1 = require("angularfire2/angularfire2");
 var moment = require("moment");
 var lodash = require("lodash");
 var UserData_1 = require("../UserData");
-var firebase_1 = require("firebase");
 var JobPath_1 = require("../JobPath");
 var JobType_1 = require("../../enums/JobType");
 var JobStatus_1 = require("../../enums/JobStatus");
@@ -18,19 +18,23 @@ describe("Data layer tests...", function () {
     var userCredentials = { email: "", password: "" };
     this.timeout(50000);
     beforeEach(function () {
-        console.log(firebase_1.app("[DEFAULT]"));
+        // console.log(app("[DEFAULT]"));
         testing_1.TestBed.configureTestingModule({
             declarations: [],
             providers: [
-                { provide: angularfire2_1.FirebaseApp, useValue: firebase_1.app("[DEFAULT]") },
-                angularfire2_1.firebaseAuthConfig({
-                    provider: angularfire2_1.AuthProviders.Password,
-                    method: angularfire2_1.AuthMethods.Password
-                }),
+                // {provide: FirebaseUrl, useValue: new OpaqueToken("FirebaseUrl") },
+                // {provide: WindowLocation, useValue: new OpaqueToken("WindowLocation") },
+                // { provide: FirebaseApp, useValue: app("[DEFAULT]") },
+                // firebaseAuthConfig({
+                //     provider: AuthProviders.Password,
+                //     method: AuthMethods.Password
+                // }),
+                // { provide: AngularFireAuth, useClass: AngularFireAuth },
+                // { provide: AuthBackend, useClass: AuthBackend },
                 angularfire2_1.AngularFire,
                 angularfire2_1.FirebaseAuth
             ],
-            imports: []
+            imports: [index_1.FirebaseModule]
         });
         console.log("before each...");
     });
@@ -50,7 +54,7 @@ describe("Data layer tests...", function () {
                 var authSubscribe = angularFire.auth.subscribe(function (auth) {
                     var listPromises = [];
                     lodash.forEach(listPathsToRemove, function (path) {
-                        // listPromises.push(angularFire.database.list(path).remove());
+                        listPromises.push(angularFire.database.list(path).remove());
                     });
                     Promise.all(listPromises)
                         .then(function () {
@@ -162,7 +166,7 @@ describe("Data layer tests...", function () {
             userCredentials.password = "password";
             firebaseAuth.login(userCredentials)
                 .then(function () {
-                var authSubscribe = angularFire.auth.subscribe(function (auth) {
+                var authSubscribe = angularFire.auth.take(1).subscribe(function (auth) {
                     var actPath = new ActivityPath_1.ActivityPath();
                     actPath.Activity.started = new Date().getUTCMilliseconds();
                     actPath.Activity.duration = 60 * 60 * 1000;
@@ -186,14 +190,34 @@ describe("Data layer tests...", function () {
                         return jobPath.saveToDatabase(angularFire, auth.uid);
                     })
                         .then(function () {
-                        done();
+                        JobPath_1.JobPath.loadAllFromDatabase(angularFire, auth.uid).subscribe(function (listJobs) {
+                            expect(listJobs).to.not.be.null;
+                            console.log("List of jobs: " + listJobs);
+                            lodash.forEach(listJobs, function (objJobData) {
+                                expect(objJobData).to.not.be.null;
+                                expect(objJobData).to.not.be.undefined;
+                                expect(objJobData.Job).to.not.be.undefined;
+                                expect(objJobData.Job.name).to.equal("Test job");
+                                console.log("Activity list: " + objJobData.ActivityPathList);
+                                objJobData.ActivityPathList.take(1).subscribe(function (activityPathList) {
+                                    expect(activityPathList).to.not.be.undefined;
+                                    expect(activityPathList.length).to.equal(1);
+                                    lodash.forEach(activityPathList, function (activityPathObs) {
+                                        activityPathObs.take(1).subscribe(function (activityPath) {
+                                            expect(activityPath.Activity.description).to.equal("A new activity");
+                                            expect(activityPath.Activity.duration).to.equal(60 * 60 * 1000);
+                                            done();
+                                        });
+                                    });
+                                });
+                            });
+                        });
                     })
                         .catch(function (error) {
                         console.log(error);
                         done(error);
                     });
                 });
-                authSubscribe.unsubscribe();
             });
         });
     });

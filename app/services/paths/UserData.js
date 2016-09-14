@@ -1,5 +1,5 @@
 // ****THIS IS A CODE GENERATED FILE DO NOT EDIT****
-// Generated on Fri Sep 09 19:42:27 AEST 2016
+// Generated on Wed Sep 14 10:04:47 AEST 2016
 "use strict";
 var User_1 = require("../types/User");
 var UserData = (function () {
@@ -45,7 +45,8 @@ var UserData = (function () {
         var strPath = UserData.buildPath(userid);
         return angularFire.database.object(strPath)
             .subscribe(function (objUserData) {
-            return objUserData.$exists();
+            // TODO: change this once angularfire2 is updated to include $exists
+            return true; // objUserData.$exists();
         }, function () {
             return false;
         });
